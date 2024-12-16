@@ -8,7 +8,7 @@ using UnityEngine.EventSystems; // For detecting input in UI elements
 public class Touch_Input : MonoBehaviour,IPointerDownHandler,IPointerUpHandler,IDragHandler
 
 {
-        //public float sensitivity;
+        public float sensitivity;
  /*      [Header("Look")]
       //  public Touch touch;
         public Transform Cinemachine_Track;
