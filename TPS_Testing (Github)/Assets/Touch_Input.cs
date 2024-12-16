@@ -4,9 +4,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems; // For detecting input in UI elements
 
-public class Touch_Input : MonoBehaviour
+
+public class Touch_Input : MonoBehaviour,IPointerDownHandler,IPointerUpHandler,IDragHandler
+
 {
-        public float sensitivity;
+        //public float sensitivity;
  /*      [Header("Look")]
       //  public Touch touch;
         public Transform Cinemachine_Track;
@@ -177,7 +179,7 @@ public class Touch_Input : MonoBehaviour
     {
         TouchDist.x = eventData.delta.x;
         TouchDist.y = eventData.delta.y;
-       
+       // Debug.Log("TouchDist.x " + TouchDist.x +" TouchDist.y "+ TouchDist.y);
     }
 
 
@@ -193,6 +195,9 @@ public class Touch_Input : MonoBehaviour
     }
     private float HandleAxisInputDelegate(string axisName)
     {
+
+      
+                     
         switch (axisName)
         {
 
