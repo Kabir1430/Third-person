@@ -3,13 +3,15 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems; // For detecting input in UI elements
+using UnityEngine.UI; // For detecting input in UI elements
 
 
-public class Touch_Input : MonoBehaviour,IPointerDownHandler,IPointerUpHandler,IDragHandler
+
+public class Touch_Input : MonoBehaviour
 
 {
-        //public float sensitivity;
- /*      [Header("Look")]
+
+      [Header("Look")]
       //  public Touch touch;
         public Transform Cinemachine_Track;
 
@@ -29,7 +31,11 @@ public class Touch_Input : MonoBehaviour,IPointerDownHandler,IPointerUpHandler,I
         public float currentY;   
         public int activeTouchId;
 
+        public float sensitivity;
+
         public bool rotatingCamera;
+
+    public bool Check_Filed;
 
         public Player_Controller playeScript;
         [Header("UI")]
@@ -62,13 +68,15 @@ public class Touch_Input : MonoBehaviour,IPointerDownHandler,IPointerUpHandler,I
 
                 if (IsTouchOverUI(touch.position))
                 {
-                    sensitivity = 6;
+                    //sensitivity = 6;
+                    Check_Filed = true;
                     Debug.Log("Touching image");
-                    switch (touch.phase)
+                    switch (touch.phase )
                     {
-
                         case UnityEngine.TouchPhase.Began:
-                            // Check if touch is on the right half of the screen for rotating camera
+                        // Check if touch is on the right half of the screen for rotating camera
+                        // Check if the ended touch was the active one for camera rotation
+                        
                             if (touch.position.x >= Screen.width / 2)
                             {
                                 if (!rotatingCamera)
@@ -81,6 +89,7 @@ public class Touch_Input : MonoBehaviour,IPointerDownHandler,IPointerUpHandler,I
                             break;
                         case UnityEngine.TouchPhase.Moved:
                             // Check if this touch is the active one for camera rotation
+                                      
                             if (rotatingCamera && touch.fingerId == activeTouchId)
                             {
                                 Vector2 delta = touch.position - lastTouchPosition;
@@ -91,9 +100,10 @@ public class Touch_Input : MonoBehaviour,IPointerDownHandler,IPointerUpHandler,I
                                 currentY = Mathf.Clamp(currentY, -Vertical_Limit, Vertical_Limit); // Clamp vertical rotation
                                 lastTouchPosition = touch.position;
                             }
+                        
                             break;
                         case UnityEngine.TouchPhase.Ended:
-                            // Check if the ended touch was the active one for camera rotation
+                        // Check if the ended touch was the active one for camera rotation
                             if (touch.fingerId == activeTouchId)
                             {
                                 activeTouchId = -1;
@@ -107,7 +117,7 @@ public class Touch_Input : MonoBehaviour,IPointerDownHandler,IPointerUpHandler,I
                 else
                 {
                     Debug.Log("Not Touching image");
-                    sensitivity = 0;
+                Check_Filed = false;
                 }
             }
 
@@ -155,79 +165,6 @@ public class Touch_Input : MonoBehaviour,IPointerDownHandler,IPointerUpHandler,I
             return false; // If no raycast hit the target image, return false
         }
 
-    }  
-
-
-        */
-    [Header("Touch Inputs")]              //this your script 
-    [SerializeField]
-    public float touchSensitivity = 10f;
-
-
-    public CinemachineVirtualCamera Cinemachine;  
-
-    public CinemachinePOV POV;  
-    [SerializeField]
-
-    public static Vector2 TouchDist;
-    private void Start()
-    {
-        POV = Cinemachine.GetCinemachineComponent<CinemachinePOV>();
-        CinemachineCore.GetInputAxis = HandleAxisInputDelegate;
-    }
-    public void OnDrag(PointerEventData eventData)
-    {
-        TouchDist.x = eventData.delta.x;
-        TouchDist.y = eventData.delta.y;
-       // Debug.Log("TouchDist.x " + TouchDist.x +" TouchDist.y "+ TouchDist.y);
-    }
-
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-    }
-
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        TouchDist = Vector2.zero;
-
-      
-    }
-    private float HandleAxisInputDelegate(string axisName)
-    {
-
-      
-                     
-        switch (axisName)
-        {
-
-            case "Mouse X":
-
-                if (Input.touchCount > 0)
-                {
-                    return TouchDist.x / touchSensitivity;
-                }
-                else
-                {
-                    return Input.GetAxis(axisName);
-                }
-
-            case "Mouse Y":
-                if (Input.touchCount > 0)
-                {
-                    return TouchDist.y / touchSensitivity;
-                }
-                else
-                {
-                    return Input.GetAxis(axisName);
-                }
-
-            default:
-                Debug.LogError("Input <" + axisName + "> not recognyzed.", this);
-                break;
-        }
-
-        return 0f;
-
+   
+   
 }
-    }

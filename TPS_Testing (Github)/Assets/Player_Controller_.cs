@@ -3,7 +3,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Player_Controller : MonoBehaviour
+public class Player_Controller_POV : MonoBehaviour
 {
 
 
@@ -17,35 +17,26 @@ public class Player_Controller : MonoBehaviour
 
     [Header("Look")] 
     public float smoothSpeed= 0f;
-    //   public Camera Camera;
-    public Transform Object;
+     public Camera Camera;
+   // public Transform Object;
 
     [Header("Fps")]  
+
     public float timeBetweenFrames;
     public int frameCount;
     public float fps;  // The calculated FPS
     public float updateInterval = 0.5f; // How o
     public TextMeshProUGUI FPS;
+ 
     [Header("UI")]
 
     public TextMeshProUGUI Player_Rot;
-
     public TextMeshProUGUI Time_Text;
-     public TextMeshProUGUI Sensitivity;
     public TextMeshProUGUI Player_Speed;
-   public  float horizontal;
-
+    public  float horizontal;
     public float vertical;
 
 
-    public bool playerisMoving;
-
-    //[Header("Touch_Input")]
-//    public Touch_Input Touch;
-  //  [Header("POV")]
-
-    [Header("ONDRAG")]
-    public OnDrag_Object OnDrag;
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -56,33 +47,37 @@ public class Player_Controller : MonoBehaviour
     void Update()
     {
 
-         horizontal = joystick.Horizontal;
-        vertical = joystick.Vertical;
-       
+        //  Look();
+
+        float horizontal = /*Input.GetAxis("Horizontal");*/joystick.Horizontal;
+        float vertical = /*Input.GetAxis("Vertical");/*/joystick.Vertical;
         Vector3 move = new Vector3(horizontal, 0f, vertical);
-                move = move.x * Object.right.normalized + move.z * Object.forward.normalized;
+        move = move.x * Camera.transform.right.normalized + move.z * Camera.transform.forward.normalized;
+        move = move.normalized * moveSpeed * Time.deltaTime;
 
-                move = move.normalized * moveSpeed * Time.deltaTime;
-                move.y = 0f;
-                rb.MovePosition(transform.position + move);
-      if (move.magnitude > 0f)
+        move.y = 0f;
+        rb.MovePosition(transform.position + move);
+
+
+
+
+
+
+        if (move.magnitude > 0f)
         {
-            // Calculate the target direction based on the joystick input
-           
-                // Calculate the target rotation to look in the direction of movement
-                Quaternion targetRotation = Quaternion.Euler(0,Object.localEulerAngles.y,0);
+            // Calculate the target rotation
+            Quaternion targetRotation = Quaternion.LookRotation(move);
 
-                // Smoothly rotate to the target direction using Quaternion.Lerp
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * smoothSpeed);
+            // Smoothly rotate to the target direction using Quaternion.Lerp
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * smoothSpeed);
         }
-
         Update_ui();
         BlendTree(horizontal, vertical);
 
-       Fps();
+        //         Fps();
     }
-   
-    
+
+
     void Jump()    
     {
         if (Mathf.Abs(rb.velocity.y) < 0.1f)
