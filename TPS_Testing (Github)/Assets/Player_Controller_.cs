@@ -72,7 +72,8 @@ public class Player_Controller_POV : MonoBehaviour
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * smoothSpeed);
         }
         Update_ui();
-        BlendTree(horizontal, vertical);
+
+        BlendTree();
 
         //         Fps();
     }
@@ -117,20 +118,13 @@ public class Player_Controller_POV : MonoBehaviour
     {
         Player_Rot.text = smoothSpeed.ToString();
         Player_Speed.text = moveSpeed.ToString();
-        Time_Text.text = Time.timeScale.ToString();
+        //Time_Text.text = Time.timeScale.ToString();
       //  Sensitivity.text = Touch.sensitivity.ToString();
     }
-    void BlendTree(float x, float y)
-    {
-        // currentMoveY = Mathf.SmoothDamp(currentMoveY, y, ref velocityY, smoothingSpeed);
-       // float speed = new Vector2(x, y).sqrMagnitude;
-        //speed = Mathf.Clamp(speed, 0, 10);
-        // Set the parameters in the Animator for each axis independently, without extra scaling or delta time.
 
-        //Anim.SetFloat("x",x, AnimSpeed,Time.deltaTime);  // Horizontal movement blend
-        //    Anim.SetFloat("y",y, AnimSpeed ,Time.deltaTime);  // Vertical movement blend
-     //   Anim.SetFloat("y", speed, AnimSpeed, Time.deltaTime);  // Vertical movement blend
-                                                               // Debug.Log( y);
+    void BlendTree()
+    {
+
 
         if (joystick.Horizontal != 0|| joystick.Vertical  != 0)
         {

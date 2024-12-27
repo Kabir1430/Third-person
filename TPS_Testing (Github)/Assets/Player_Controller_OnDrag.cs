@@ -8,20 +8,28 @@ public class Player_Controller_POV_OnDrag : MonoBehaviour
 
 
   [Header("Movement")] 
+
     public FixedJoystick joystick;
     public float moveSpeed = 5f;
-    public Rigidbody rb;
     public Animator Anim;
+    Vector3 move;
+
+    public CharacterController controller;
+    public bool isGrounded;
+
+    public bool Standing;
+    public Animator Crosshair;
     public float smoothingSpeed = 0.1f;  // Speed of smoothing for both axes   
     public float AnimSpeed ;   // Target horizontal movement (input-based)
-
+    public float gravity;   // Target horizontal movement (input-based)
+    public   Vector3 playerVelocity;
     [Header("Look")] 
-    public float smoothSpeed= 0f;
+    public float Player_smoothSpeed= 0f;
+    public float Camera_smoothSpeed= 0f;
      public Camera Camera;
    // public Transform Object;
 
-    [Header("Fps")]  
-
+    [Header("Fps")]
     public float timeBetweenFrames;
     public int frameCount;
     public float fps;  // The calculated FPS
@@ -29,61 +37,98 @@ public class Player_Controller_POV_OnDrag : MonoBehaviour
     public TextMeshProUGUI FPS;
  
     [Header("UI")]
-
     public TextMeshProUGUI Player_Rot;
     public TextMeshProUGUI Time_Text;
     public TextMeshProUGUI Player_Speed;
-    public  float horizontal;
-    public float vertical;
+    public OnDrag_Object OnDrag_Object;
+    [Header("Added By Aedan")]
+    [SerializeField] Transform chest;
+    [SerializeField] Transform cam_pivot;
 
+    //public Vector3 moveDir;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-
-      
+        cam_pivot.SetParent(null);
     }
 
-    void Update()
-    {        //  Look();
-        float horizontal = /*Input.GetAxis("Horizontal");*/joystick.Horizontal;
-        float vertical = /*Input.GetAxis("Vertical");/*/joystick.Vertical;
-        Vector3 move = new Vector3(horizontal, 0f, vertical);
+
+     void FixedUpdate()
+    {
+        Follow();
+     Charater_Move();
+        
+    }
+
+    private void Follow()
+    {
+        // Smoothing the cam_pivot position based on chest position
+        Vector3 targetPosition = chest.position;
+        cam_pivot.position = Vector3.Lerp(cam_pivot.position, targetPosition, Time.deltaTime * Camera_smoothSpeed);
+    }
+
+
+    private void Charater_Move()        
+    {
+        isGrounded=controller.isGrounded;
+        float horizontal = joystick.Horizontal;
+        float vertical = joystick.Vertical;
+        if(move!=Vector3.zero)
+        {
+            Standing = false;
+            BlendTree(horizontal, vertical);
+            Anim.SetBool("Stand", Standing);
+        }
+        else
+
+        {
+            Standing=true;
+
+           // OnDrag_Object.Rotate_Camera();
+            Anim.SetBool("Stand", Standing);
+        }
+
+      move = new Vector3(horizontal, 0f, vertical);
+       
         move = move.x * Camera.transform.right.normalized + move.z * Camera.transform.forward.normalized;
-        move = move.normalized * moveSpeed * Time.deltaTime;
+        move = move.normalized * moveSpeed * 2 * Time.deltaTime;
 
         move.y = 0f;
-        rb.MovePosition(transform.position + move);
-
-        if (move.magnitude > 0f)
+        controller.Move(move * Time.deltaTime *moveSpeed);
+        Crosshair.SetBool("walk", false);
+        
+        if(move!=Vector3.zero)
         {
-            // Calculate the target rotation
-            Quaternion targetRotation = Quaternion.LookRotation(move);
-            // Smoothly rotate to the target direction using Quaternion.Lerp
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * smoothSpeed);
+         Crosshair.SetBool("walk", true);
         }
+        Quaternion targetRotation = Quaternion.Euler(0,Camera.transform.eulerAngles.y,0);  // Find the target rotation based on movement direction
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Player_smoothSpeed * Time.deltaTime);  // Smoothly rotate the character
+
+
+        if (!isGrounded)
+        {
+            playerVelocity.y += gravity * Time.deltaTime;
+
+        }
+        else
+        {
+            playerVelocity.y = 0;
+        }
+        
+        controller.Move(playerVelocity * Time.deltaTime);
         Update_ui();
-        BlendTree(horizontal, vertical);
+        Fps();
 
-        //         Fps();
     }
 
-
-    void Jump()    
-    {
-        if (Mathf.Abs(rb.velocity.y) < 0.1f)
-        {
-            
-           // rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        }
-    }
 
 
 
     public void Player_Rot_UI(float Value)
     {
-        smoothSpeed = Value;
-        Player_Rot.text = smoothSpeed.ToString();
+
+        Player_smoothSpeed = Value;
+        Player_Rot.text = Player_smoothSpeed.ToString();
     }
     public void Player_Speed_UI(float Value)
     {
@@ -91,13 +136,6 @@ public class Player_Controller_POV_OnDrag : MonoBehaviour
         Player_Speed.text = moveSpeed.ToString();
     }
 
-   /* public void Player_Sensor(float Value)
-    {
-      Touch.sensitivity= Value;
-
-             Sensitivity.text = Touch.sensitivity.ToString();
-    }
-    */
     public void Time_Delta(float Value)
     {
         Time.timeScale = Value;
@@ -106,22 +144,19 @@ public class Player_Controller_POV_OnDrag : MonoBehaviour
     }
     void Update_ui()
     {
-        Player_Rot.text = smoothSpeed.ToString();
+        Player_Rot.text = Player_smoothSpeed.ToString();
         Player_Speed.text = moveSpeed.ToString();
         Time_Text.text = Time.timeScale.ToString();
-      //  Sensitivity.text = Touch.sensitivity.ToString();
-    }
-    void BlendTree(float x, float y)
-    {
-        // currentMoveY = Mathf.SmoothDamp(currentMoveY, y, ref velocityY, smoothingSpeed);
-       // float speed = new Vector2(x, y).sqrMagnitude;
-        //speed = Mathf.Clamp(speed, 0, 10);
-        // Set the parameters in the Animator for each axis independently, without extra scaling or delta time.
 
-        //Anim.SetFloat("x",x, AnimSpeed,Time.deltaTime);  // Horizontal movement blend
-        //    Anim.SetFloat("y",y, AnimSpeed ,Time.deltaTime);  // Vertical movement blend
-     //   Anim.SetFloat("y", speed, AnimSpeed, Time.deltaTime);  // Vertical movement blend
-                                                               // Debug.Log( y);
+        OnDrag_Object.Sensitvity.text = OnDrag_Object.sensitivity.ToString();
+    }
+    public void BlendTree(float x, float y)
+    {
+        Anim.SetFloat("x", x,AnimSpeed,Time.deltaTime);          // Update Speed in Animator
+        Anim.SetFloat("y", y,AnimSpeed,Time.deltaTime);  // Update Direction in Animator
+    }
+    void Animation_Bool()
+    {
 
         if (joystick.Horizontal != 0|| joystick.Vertical  != 0)
         {
@@ -141,7 +176,7 @@ public class Player_Controller_POV_OnDrag : MonoBehaviour
         // Count frames and accumulate time
         timeBetweenFrames += Time.deltaTime;
         frameCount++;
-
+          
         // Update the FPS value every updateInterval seconds
         if (timeBetweenFrames >= updateInterval)
         {
