@@ -73,37 +73,30 @@ public class Player_Controller_POV_OnDrag : MonoBehaviour
         isGrounded=controller.isGrounded;
         float horizontal = joystick.Horizontal;
         float vertical = joystick.Vertical;
-        if(move!=Vector3.zero)
-        {
-            Standing = false;
-            BlendTree(horizontal, vertical);
-            Anim.SetBool("Stand", Standing);
-        }
-        else
-
-        {
-            Standing=true;
-
-           // OnDrag_Object.Rotate_Camera();
-            Anim.SetBool("Stand", Standing);
-        }
-
+     
       move = new Vector3(horizontal, 0f, vertical);
        
         move = move.x * Camera.transform.right.normalized + move.z * Camera.transform.forward.normalized;
         move = move.normalized * moveSpeed * 2 * Time.deltaTime;
 
         move.y = 0f;
-        controller.Move(move * Time.deltaTime *moveSpeed);
-        Crosshair.SetBool("walk", false);
         
         if(move!=Vector3.zero)
         {
-         Crosshair.SetBool("walk", true);
-        }
-        Quaternion targetRotation = Quaternion.Euler(0,Camera.transform.eulerAngles.y,0);  // Find the target rotation based on movement direction
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Player_smoothSpeed * Time.deltaTime);  // Smoothly rotate the character
+            Quaternion targetRotation = Quaternion.LookRotation(move);
 
+            // Smoothly rotate the character towards the target rotation
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * Player_smoothSpeed);
+
+            Crosshair.SetBool("walk", true);        
+            Anim.SetBool("Run", true);
+        }
+        else
+        {
+        Crosshair.SetBool("walk", false);
+         Anim.SetBool("Run", false);      
+
+        }
 
         if (!isGrounded)
         {
@@ -115,6 +108,7 @@ public class Player_Controller_POV_OnDrag : MonoBehaviour
             playerVelocity.y = 0;
         }
         
+        controller.Move(move * Time.deltaTime *moveSpeed);
         controller.Move(playerVelocity * Time.deltaTime);
         Update_ui();
         Fps();

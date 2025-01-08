@@ -47,7 +47,7 @@ public class OnDrag_Object: MonoBehaviour,IPointerDownHandler,IPointerUpHandler,
           //  Debug.Log("TouchDist.x " + TouchDist.x + " TouchDist.y " + TouchDist.y);
 
             Rotate_Camera(); 
-            if (Player_Controller_POV_OnDrag.Standing)
+           /* if (Player_Controller_POV_OnDrag.Standing)
             {
 
                 Turn_tree();
@@ -56,7 +56,7 @@ public class OnDrag_Object: MonoBehaviour,IPointerDownHandler,IPointerUpHandler,
             {
                 Turn.SetFloat("turn", 0f);
             }
-
+           */
 
         }
       
